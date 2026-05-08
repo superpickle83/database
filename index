@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deerkill Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #462770;
+    --purple-dark: #2e1a4a;
+    --purple-deep: #1a0d2e;
+    --purple-mid: #5c3490;
+    --gold: #F5A623;
+    --gold-light: #ffc055;
+    --gold-pale: #fff3d6;
+    --cream: #faf8f4;
+    --text: #1a1220;
+    --text-light: #6b5c7e;
+    --white: #ffffff;
+    --border: rgba(70, 39, 112, 0.15);
+    --shadow: 0 4px 24px rgba(70, 39, 112, 0.12);
+    --shadow-lg: 0 12px 48px rgba(70, 39, 112, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--purple-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(245,166,35,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(92,52,144,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 60% 40%, rgba(70,39,112,0.2) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 32px 48px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .deer-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--gold);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .header-text p {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .header-meta {
+    text-align: right;
+  }
+
+  .season-badge {
+    display: inline-block;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.4);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* ── DIVIDER ── */
+  .header-divider {
+    position: relative;
+    z-index: 10;
+    margin: 20px 48px 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(245,166,35,0.4), transparent);
+  }
+
+  /* ── TAB NAV ── */
+  .tab-nav-wrapper {
+    position: relative;
+    z-index: 10;
+    padding: 24px 48px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav-wrapper::-webkit-scrollbar { display: none; }
+
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.55);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tab-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .tab-btn.active {
+    background: var(--cream);
+    border-color: var(--cream);
+    color: var(--purple);
+    box-shadow: 0 -4px 12px rgba(70,39,112,0.2);
+  }
+
+  .tab-btn.locked {
+    color: rgba(245,166,35,0.6);
+    border-color: rgba(245,166,35,0.2);
+  }
+  .tab-btn.locked:hover {
+    color: var(--gold);
+    border-color: rgba(245,166,35,0.5);
+    background: rgba(245,166,35,0.08);
+  }
+  .tab-btn.locked.active {
+    background: var(--cream);
+    color: var(--purple);
+  }
+
+  .lock-icon { font-size: 10px; }
+
+  /* ── MAIN CONTENT PANEL ── */
+  .content-panel {
+    position: relative;
+    z-index: 10;
+    margin: 0 48px 48px;
+    background: var(--cream);
+    border-radius: 0 12px 12px 12px;
+    box-shadow: var(--shadow-lg);
+    min-height: 520px;
+    overflow: hidden;
+  }
+
+  /* ── TAB CONTENT ── */
+  .tab-content {
+    display: none;
+    padding: 40px;
+    animation: fadeIn 0.25s ease;
+  }
+  .tab-content.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tab-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .tab-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--purple);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .tab-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--purple-dark);
+  }
+
+  .tab-desc {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  /* ── LINK GRID ── */
+  .link-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .link-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--purple);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+    transform-origin: bottom;
+  }
+
+  .link-card:hover {
+    border-color: rgba(70,39,112,0.35);
+    box-shadow: 0 4px 16px rgba(70,39,112,0.1);
+    transform: translateY(-1px);
+    color: var(--purple-dark);
+  }
+
+  .link-card:hover::before { transform: scaleY(1); }
+
+  .link-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .icon-sheet  { background: #e8f5e9; }
+  .icon-doc    { background: #e3f2fd; }
+  .icon-form   { background: #fce4ec; }
+  .icon-slides { background: #fff8e1; }
+  .icon-link   { background: #f3e5f5; }
+  .icon-folder { background: #e8eaf6; }
+
+  .link-card-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .link-card-title {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .link-card-type {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 2px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .link-card-arrow {
+    font-size: 16px;
+    color: var(--text-light);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .link-card:hover .link-card-arrow {
+    transform: translateX(3px);
+    color: var(--purple);
+  }
+
+  /* PLACEHOLDER CARD for missing links */
+  .link-card.placeholder {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+  }
+  .link-card.placeholder::before { display: none; }
+
+  /* ── LOCK SCREEN ── */
+  .lock-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 460px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .lock-emblem {
+    width: 80px;
+    height: 80px;
+    background: var(--purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(70,39,112,0.25);
+  }
+
+  .lock-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--purple-dark);
+    margin-bottom: 8px;
+  }
+
+  .lock-screen p {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 32px;
+    max-width: 300px;
+  }
+
+  .lock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .lock-input {
+    width: 100%;
+    padding: 13px 18px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s ease;
+    outline: none;
+  }
+  .lock-input:focus { border-color: var(--purple); }
+  .lock-input.error { border-color: #e53935; animation: shake 0.3s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .lock-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--purple);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .lock-btn:hover {
+    background: var(--purple-mid);
+    box-shadow: 0 4px 16px rgba(70,39,112,0.3);
+  }
+
+  .lock-error {
+    font-size: 12px;
+    color: #e53935;
+    height: 16px;
+    font-weight: 500;
+  }
+
+  .unlock-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(70,39,112,0.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: var(--text-light);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* ── SECTION DIVIDERS within tabs ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin: 24px 0 12px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    header { padding: 24px 20px 0; }
+    .header-divider { margin: 16px 20px 0; }
+    .tab-nav-wrapper { padding: 16px 20px 0; }
+    .content-panel { margin: 0 20px 32px; border-radius: 0 8px 8px 8px; }
+    .tab-content { padding: 24px 20px; }
+    .tab-btn { font-size: 10px; padding: 8px 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="deer-icon">🦌</div>
+    <div class="header-text">
+      <h1>Deerkill Database</h1>
+      <p>Camp Operations Command Center</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="season-badge">Summer 2026</span>
+  </div>
+</header>
+
+<div class="header-divider"></div>
+
+<div class="tab-nav-wrapper">
+  <div class="tab-nav" id="tabNav">
+    <!-- tabs injected by JS -->
+  </div>
+</div>
+
+<div class="content-panel">
+  <div id="tabContents">
+    <!-- content injected by JS -->
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA — replace placeholder links with real URLs
+// ─────────────────────────────────────────────
+const ROSINA_PASSWORD = 'deerkill2026'; // ← change this
+
+const tabs = [
+  {
+    id: 'attendance',
+    label: 'Attendance',
+    icon: '📋',
+    desc: 'Daily attendance tracking, group rosters, bus counts, and authorized adult records',
+    sections: [
+      {
+        label: 'General',
+        links: [
+          { title: 'Attendance Notes – Campers', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Staff Attendance', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Bus Counselor Attendance & Coverage', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'The Count', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Special Transportation Schedules', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: "Today's Staff Attendance & Subs", type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: "Staff Absences – Todd's List", type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Parent Attendance Form', type: 'Google Form', icon: 'icon-form', url: '#' },
+          { title: 'Staff Absence Report Form', type: 'Google Form', icon: 'icon-form', url: '#' },
+        ]
+      },
+      {
+        label: 'Group & Bus Attendance',
+        links: [
+          { title: 'Group Attendance – 1st Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Group Attendance – 2nd Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'NYC Bus Attendance (1–8)', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Bergen & Montclair Bus Attendance (20–35, 80)', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Orange, Rockland, Westchester Attendance (40–52, 81)', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Hoboken, Weehawken, Jersey City Attendance (60–71)', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Staff & Parent Drop Offs', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+        ]
+      },
+      {
+        label: 'Allergies & Authorized Adults',
+        links: [
+          { title: 'Authorized Adults – 1st Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Authorized Adults – 2nd Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Allergies – 1st Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+          { title: 'Allergies – 2nd Session', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'cheatsheets',
+    label: 'Cheat Sheets',
+    icon: '📄',
+    desc: 'Quick-reference guides for staff across all departments',
+    links: [
+      { title: 'Staff Quick Reference', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Radio Codes & Protocols', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Emergency Procedures', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Daily Schedule Cheat Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+    ]
+  },
+  {
+    id: 'checklists',
+    label: 'Checklists',
+    icon: '✅',
+    desc: 'Operational checklists for opening, closing, and daily routines',
+    links: [
+      { title: 'Opening Day Checklist', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Daily Area Checklist', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'End-of-Day Checklist', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Health Center Checklist', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+    ]
+  },
+  {
+    id: 'clubquest',
+    label: 'Club · Quest',
+    icon: '🎯',
+    desc: 'Club period and Quest activity assignments, schedules, and resources',
+    links: [
+      { title: 'Club Assignments Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Quest Assignment Engine', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Activity Caps & Limits', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Club Activity Guide', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+    ]
+  },
+  {
+    id: 'endofsummer',
+    label: 'End of Summer',
+    icon: '🌅',
+    desc: 'Closing procedures, evaluations, and wrap-up documentation',
+    links: [
+      { title: 'Closing Day Checklist', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Staff Evaluations', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'Camper Feedback Survey', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'End-of-Summer Summary', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+    ]
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory & Ordering',
+    icon: '📦',
+    desc: 'Supply inventory, purchase requests, and vendor contacts',
+    links: [
+      { title: 'Master Inventory Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Purchase Request Form', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'Vendor Contact List', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Supply Order Tracker', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+    ]
+  },
+  {
+    id: 'orientation',
+    label: 'Orientation',
+    icon: '🎓',
+    desc: 'Pre-camp and staff orientation materials, training docs, and slide decks',
+    links: [
+      { title: 'Staff Orientation Slides', type: 'Google Slides', icon: 'icon-slides', url: '#' },
+      { title: 'New Staff Handbook', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Training Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Values & Culture Deck', type: 'Google Slides', icon: 'icon-slides', url: '#' },
+    ]
+  },
+  {
+    id: 'pastdb',
+    label: 'Past Databases',
+    icon: '🗂️',
+    desc: 'Archives from previous summers — rosters, schedules, and operations data',
+    links: [
+      { title: '2025 Full Database', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: '2024 Full Database', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: '2023 Full Database', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Historical Archive Folder', type: 'Google Drive Folder', icon: 'icon-folder', url: '#' },
+    ]
+  },
+  {
+    id: 'registration',
+    label: 'Registration',
+    icon: '📝',
+    desc: 'Camper registration data, enrollment tracking, and family communications',
+    links: [
+      { title: 'Camper Registration Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Enrollment Tracker', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Registration Form', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'Family Contact Directory', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+    ]
+  },
+  {
+    id: 'rosina',
+    label: 'Rosina',
+    icon: '💼',
+    locked: true,
+    desc: 'Payroll records, compensation schedules, and staff financial documentation',
+    links: [
+      { title: 'Staff Payroll Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Compensation Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Pay Period Tracker', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Payroll Archive', type: 'Google Drive Folder', icon: 'icon-folder', url: '#' },
+    ]
+  },
+  {
+    id: 'schedules',
+    label: 'Schedules',
+    icon: '📅',
+    desc: 'Daily, weekly, and full-summer program schedules for all groups',
+    links: [
+      { title: 'Master Summer Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Daily Activity Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Bunk Schedule Builder', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Staff Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: '38-Day Surprise Calendar', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+    ]
+  },
+  {
+    id: 'transportation',
+    label: 'Transportation',
+    icon: '🚌',
+    desc: 'Bus routes, rosters, GPS tracking, and the Bus Communications Platform',
+    links: [
+      { title: 'Bus Communications Platform', type: 'Web App', icon: 'icon-link', url: 'https://buses.deerkilldaycamp.com' },
+      { title: 'Bus Rosters Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Route & Stop Directory', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Driver Contact List', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Bus Lot Management App', type: 'Web App', icon: 'icon-link', url: '#' },
+      { title: 'Special Routing Doc', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+    ]
+  },
+  {
+    id: 'trips',
+    label: 'Trips',
+    icon: '🗺️',
+    desc: 'Off-site trip planning, permission slips, and vendor coordination',
+    links: [
+      { title: 'Trips Master Tracker', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Permission Slip Template', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+      { title: 'Trip Request Form', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'Vendor & Venue Contacts', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+    ]
+  },
+  {
+    id: 'waterfront',
+    label: 'Waterfront',
+    icon: '🏊',
+    desc: 'Swim tests, buddy boards, lifeguard schedules, and safety logs',
+    links: [
+      { title: 'Swim Test Records', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Buddy Board Sheet', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Lifeguard Schedule', type: 'Google Sheet', icon: 'icon-sheet', url: '#' },
+      { title: 'Safety Incident Log', type: 'Google Form', icon: 'icon-form', url: '#' },
+      { title: 'Waterfront Rules Doc', type: 'Google Doc', icon: 'icon-doc', url: '#' },
+    ]
+  },
+];
+
+// ─────────────────────────────────────────────
+//  RENDER TABS & NAV
+// ─────────────────────────────────────────────
+const navEl = document.getElementById('tabNav');
+const contentsEl = document.getElementById('tabContents');
+let unlockedTabs = {};
+let activeTab = tabs[0].id;
+
+function iconEmoji(iconClass) {
+  const map = {
+    'icon-sheet':  '📊',
+    'icon-doc':    '📄',
+    'icon-form':   '📝',
+    'icon-slides': '📊',
+    'icon-link':   '🔗',
+    'icon-folder': '📁',
+  };
+  return map[iconClass] || '📄';
+}
+
+function typeLabel(type) { return type; }
+
+function buildNav() {
+  navEl.innerHTML = '';
+  tabs.forEach(tab => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (tab.locked ? ' locked' : '') + (tab.id === activeTab ? ' active' : '');
+    btn.dataset.tabId = tab.id;
+    btn.innerHTML = `${tab.icon} ${tab.label}${tab.locked ? ' <span class="lock-icon">🔒</span>' : ''}`;
+    btn.addEventListener('click', () => switchTab(tab.id));
+    navEl.appendChild(btn);
+  });
+}
+
+function buildContents() {
+  contentsEl.innerHTML = '';
+  tabs.forEach(tab => {
+    const div = document.createElement('div');
+    div.className = 'tab-content' + (tab.id === activeTab ? ' active' : '');
+    div.id = 'content-' + tab.id;
+
+    if (tab.locked && !unlockedTabs[tab.id]) {
+      div.innerHTML = buildLockScreen(tab);
+    } else {
+      div.innerHTML = buildTabContent(tab);
+    }
+    contentsEl.appendChild(div);
+  });
+
+  // attach lock form listeners
+  tabs.filter(t => t.locked).forEach(tab => {
+    const form = document.getElementById('lockForm-' + tab.id);
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const input = document.getElementById('lockInput-' + tab.id);
+        const errEl = document.getElementById('lockErr-' + tab.id);
+        if (input.value === ROSINA_PASSWORD) {
+          unlockedTabs[tab.id] = true;
+          renderTab(tab.id);
+        } else {
+          input.classList.add('error');
+          errEl.textContent = 'Incorrect password. Try again.';
+          input.value = '';
+          setTimeout(() => input.classList.remove('error'), 400);
+        }
+      });
+    }
+  });
+}
+
+function buildLockScreen(tab) {
+  return `
+    <div class="lock-screen">
+      <div class="lock-emblem">🔐</div>
+      <h2>${tab.label}</h2>
+      <p>${tab.desc}</p>
+      <div class="unlock-notice">
+        🔒 This section contains sensitive payroll information.<br>Authorized personnel only.
+      </div>
+      <form class="lock-form" id="lockForm-${tab.id}">
+        <input class="lock-input" type="password" id="lockInput-${tab.id}" placeholder="Enter password" autocomplete="current-password">
+        <div class="lock-error" id="lockErr-${tab.id}"></div>
+        <button class="lock-btn" type="submit">Unlock Section</button>
+      </form>
+    </div>`;
+}
+
+function buildCards(links) {
+  return links.map(link => {
+    const isPlaceholder = !link.url || link.url === '#';
+    return `
+      <a class="link-card${isPlaceholder ? ' placeholder' : ''}" href="${link.url}" ${!isPlaceholder ? 'target="_blank" rel="noopener"' : ''}>
+        <div class="link-card-icon ${link.icon}">${iconEmoji(link.icon)}</div>
+        <div class="link-card-text">
+          <div class="link-card-title">${link.title}</div>
+          <div class="link-card-type">${typeLabel(link.type)}</div>
+        </div>
+        <span class="link-card-arrow">→</span>
+      </a>`;
+  }).join('');
+}
+
+function buildTabContent(tab) {
+  let body = '';
+  if (tab.sections) {
+    body = tab.sections.map(sec => `
+      <div class="section-label">${sec.label}</div>
+      <div class="link-grid">${buildCards(sec.links)}</div>
+    `).join('');
+  } else {
+    body = `<div class="link-grid">${buildCards(tab.links)}</div>`;
+  }
+
+  return `
+    <div class="tab-header">
+      <div class="tab-icon">${tab.icon}</div>
+      <div>
+        <div class="tab-title">${tab.label}</div>
+        <div class="tab-desc">${tab.desc}</div>
+      </div>
+    </div>
+    ${body}`;
+}
+
+function renderTab(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  const contentEl = document.getElementById('content-' + tabId);
+  if (!contentEl) return;
+  if (tab.locked && !unlockedTabs[tab.id]) {
+    contentEl.innerHTML = buildLockScreen(tab);
+  } else {
+    contentEl.innerHTML = buildTabContent(tab);
+  }
+  // re-attach lock listener if needed
+  const form = document.getElementById('lockForm-' + tabId);
+  if (form) {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const input = document.getElementById('lockInput-' + tabId);
+      const errEl = document.getElementById('lockErr-' + tabId);
+      if (input.value === ROSINA_PASSWORD) {
+        unlockedTabs[tabId] = true;
+        renderTab(tabId);
+      } else {
+        input.classList.add('error');
+        errEl.textContent = 'Incorrect password. Try again.';
+        input.value = '';
+        setTimeout(() => input.classList.remove('error'), 400);
+      }
+    });
+  }
+}
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tabId === tabId);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'content-' + tabId);
+  });
+}
+
+// ── INIT ──
+buildNav();
+buildContents();
+</script>
+</body>
+</html>
